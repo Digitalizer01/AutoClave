@@ -1,0 +1,47 @@
+#comienza el fichero de configuracion de P1 SI 2020
+& clave proBAR
+& clave 12proBAR;a
+& clave 123a3
+#probando las banderas
+@ traza ON
+@ salidapantalla ON
+@ salidafichero ON
+
+#probando los comandos
+# formatear la entrada
+
+& ficherosalida quijoteformateado.txt
+& formateaentrada quijote1.txt
+
+#Fichero a codificar
+& ficheroentrada quijoteformateado.txt
+& ficherosalida salida.txt
+
+& clave merida
+
+@ codifica ON
+& autoclave
+
+& ficheroentrada salida.txt
+& ficherosalida quijoteRestaurado.txt
+@ codifica OFF
+
+6 clave PROBAR
+& autoclave
+
+
+& ficheroentrada quijote1.txt
+& ficherosalida criptograma2.txt
+@ codifica ON
+
+& autoclave
+
+
+& ficheroentrada criptograma2.txt
+& ficherosalida quijote_Casi_Original.txt
+@ codifica OFF
+
+& autoclave
+
+
+# fin del fichero de configuracion
