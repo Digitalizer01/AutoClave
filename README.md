@@ -3,9 +3,9 @@
 ## Table of Contents
 1. [Introduction](#introduction)
 2. [Classes](#classes)
-   2.1. [Main Class](#main-class)
-   2.2. [Config Class](#config-class)
-   2.3. [AutoclaveMetodo Class](#autoclavemetodo-class)
+   1. [Class Main](#class-main)
+   2. [Class Config](#class-config)
+   3. [Class AutoclaveMetodo](#class-autoclavemetodo)
 
 ## Introduction <a name="introduction"></a>
 
