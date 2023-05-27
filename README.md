@@ -8,7 +8,7 @@
    - [2.3. AutoclaveMetodo Class](#autoclavemetodo-class)
    - [2.4. Metodos_auxiliares Class](#metodos_auxiliares-class)
    - [2.5. Playfair Class](#playfair-class)
-   - [2.6. Caesar Class](#caesar-class)
+   - [2.6. Cesar Class](#caesar-class)
    - [2.7. Vatsayayana Class](#vatsayayana-class)
 3. [Conclusions](#conclusions)
 
@@ -20,7 +20,7 @@ This document aims to explain the underlying principles and the operation of thi
 
 ### 2. Classes<a name="classes"></a>
 
-The classes that compose this program are: Main, AutoclaveMethod, AuxiliaryMethods, Config, Playfair, Caesar, and Vatsayayana. Each class has a set of utilities which will be detailed below.
+The classes that compose this program are: Main, AutoclaveMetodo, Metodos_auxiliares, Config, Playfair, Cesar, and Vatsayayana. Each class has a set of utilities which will be detailed below.
 
 #### 2.1. Main Class<a name="main-class"></a>
 
