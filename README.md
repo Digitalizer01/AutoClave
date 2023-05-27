@@ -1,114 +1,116 @@
-# AutoClave Project Documentation
+## Index
 
 ## Table of Contents
 1. [Introduction](#introduction)
-2. [Classes](#classes)
-   1. [Class Main](#main-class)
-   2. [Class Config](#config-class)
-   3. [Class AutoclaveMetodo](#autoclavemetodo-class)
+2. [Installation](#installation)
+3. [Usage](#usage)
+   - [3.1. Command Line Arguments](#31-command-line-arguments)
+   - [3.2. Config Class](#32-config-class)
+   - [3.3. AutoclaveMethod Class](#33-autoclavemethod-class)
+   - [3.4. AuxiliaryMethods Class](#34-auxiliarymethods-class)
+   - [3.5. Playfair Class](#35-playfair-class)
+   - [3.6. Caesar Class](#36-caesar-class)
+   - [3.7. Vatsayayana Class](#37-vatsayayana-class)
+4. [Conclusions](#conclusions)
+5. [Bibliography](#bibliography)
 
-## Introduction <a name="introduction"></a>
+### 1. Introduction
 
-The "AutoClave" encryption is a Polyalphabetic cipher, which is a variant of the Vigenere cipher, also known as the Second Vigenere Cipher. Its main characteristic is that the message is encrypted with a key that consists of the same message appended with a primary key called the primary key. Therefore, the key sequence will be as long as the message itself.
+The motivation behind creating this program is the need to generate secure and reliable encrypted messages using the Vigenere table for secret communication. These messages can be both encrypted and decrypted based on the specific requirements. The program is implemented in the Java language, so familiarity with its syntax is necessary for modifications and understanding the steps indicated with comments for tracing purposes or in-depth study of its functionality.
 
-For example, if we want to encrypt the message M = "esta es la primera practica" with the key K = "merida," using the Vigenere table (see table in the image below), we would obtain the following ciphertext:
+This document aims to explain the underlying principles and the operation of this program for proper handling by the relevant personnel. We will delve into each class and explain the functionality of the methods and attributes they contain.
 
-![Screenshot](Images/VigenereTable.png)
+### 2. Paper Design
 
-Plain text: estaeslaprimerapractica
-Key: meridaestaeslaprimerapr
-Ciphertext: qwkihspsirmeprpgzmgkirr
+Before developing this software, a paper design was created to outline the basic encryption and decryption functionalities, as well as the required input arguments for the program to function correctly (see Figure 1).
 
-The decryption operation is performed in a similar manner. The first characters (as many as the length of the primary key) are decrypted using the primary key, and the rest of the characters are decrypted using the plain text we are obtaining. In the example:
+![Paper Design](link-to-image)
 
-Ciphertext: qwkihspsirmeprpgzmgkirr
-Key: meridaestaeslaprimerapr
-Decrypted text: estaeslaprimerapractica
+*Figure 1. Paper design of the software's functionality.*
 
-Our plain text will be a TXT file that contains ASCII characters from 'a' to 'z' (excluding 'ñ'). Any other symbol that is not one of those will not be encoded/decoded and will NOT be passed to the output file. To avoid this, pre-processing of the plain text can be performed as indicated in the configuration file or not.
+### 3. Classes
 
-Note: consider that the program is written in Spanish.
+The classes that compose this program are: Main, AutoclaveMethod, AuxiliaryMethods, Config, Playfair, Caesar, and Vatsayayana. Each class has a set of utilities which will be detailed below.
 
-## Classes <a name="classes"></a>
+#### 3.1. Main Class
 
-The project consists of the following classes: Main Class, Config Class, and AutoclaveMetodo Class. Each of them has a set of utilities that will be detailed below.
+This is the main class of the program. It handles the input arguments provided to the program via a .bat file located in the project's folder. The executable.bat file executes the program and contains the arguments processed by this class. The P1_si2020.bat file configures how the parameters are input and selects the .jar file that performs all the programming logic.
 
-### Main Class <a name="main-class"></a>
+The introduction of parameters adds them to the `args` array. For example, if we input `-f config.txt`, the `args` array will be `args[0] = "-f"` and `args[1] = "config.txt"`.
 
-This is the main class of the program. In this class, we handle the input arguments that we pass to the program through a .bat file located in the project execution folder. The executable.bat file executes the program and contains the arguments that we handle in this class. The P1_si2020.bat file is used to configure how the parameters are input and selects the .jar file that performs all the programming logic.
+The possible options are as follows:
 
-The introduction of parameters adds them to the `args` array. For example, if we input `-f config.txt`, the `args` array will be populated as `args[0] = "-f"` and `args[1] = "config.txt"`.
+- `-f config.txt`: Opens the config.txt file and performs all the steps indicated in the configuration file. The configuration file is not always named config.txt; it must match the actual file name.
+- `-h`: Displays help related to the program.
+- Other argument or no arguments provided: Displays a message indicating the syntax the user must follow to input the appropriate arguments.
 
-The possibilities for the input arguments are as follows:
-- `-f config.txt`: Opens the config.txt file and performs all the steps specified in that configuration file. The configuration file is not always named config.txt; it should be named according to the actual file name.
-- `-h`: Displays the program-related help.
-- Other argument or no input of arguments: Displays a message indicating the syntax that the user should follow to enter the appropriate arguments.
+Regarding the program's logic, it consists of two methods:
 
-Regarding the program logic, there are two methods:
-- `Principal`: Performs argument validation. It has three nested `if` statements:
-  - First `if`: Checks if there is anything written as an argument. If there is nothing, it displays a help message.
-  - Second `if`: Checks if the input argument is equal to `-h`. If it is, it calls the `help` method.
-  - Third `if`: Checks if the input argument is equal to `-f`. If it is, it calls the `config` method.
-- `help`: Displays a help message indicating the syntax for using the program.
-- `config`: Reads the file specified in the argument, extracts the values, and sends them to the `AutoclaveMetodo` class to be processed. The `config` method uses the `BufferedReader` class to read the file.
+- `main`: Performs argument checking. It includes three nested if statements:
+  - First if: Checks if an argument is provided. If nothing is provided, it displays the syntax to follow.
+  - Second if: Checks if the argument is `-h`. In this case, the `MostrarAyuda` method is executed.
+  - Third if: Checks if the argument is `-f config.txt`. If none of the previous conditions are met, it displays the syntax to follow.
+- `MostrarAyuda`: Displays the program's help information to correctly input the arguments.
 
-### Config Class <a name="config-class"></a>
+After the argument checking, the program proceeds to execute the instructions provided in the configuration file.
 
-This class is used to store and manage the configuration parameters read from the configuration file. It has several attributes:
-- `fichero_configuracion`: Indicates the name of the configuration file.
-- `salidapantalla`: Indicates whether there should be output data displayed on the screen (ON) or not (OFF).
-- `salidafichero`: Indicates whether the output should be written to the output file (ON) or not (OFF).
-- `codifica`: Indicates whether the Autoclave method should perform encoding (ON) or decoding (OFF).
-- `traza`: Indicates whether the program trace should be shown on the screen (ON) or not (OFF).
-- `ficheroentrada`: Indicates the name of the input file to be used for the operations with Autoclave.
-- `ficherosalida`: Indicates the name of the output file where the program output will be saved.
-- `clave`: Indicates the character string from 'a' to 'z' (excluding 'ñ') to be used as the primary key.
-- `clave_larga`: Indicates the key resulting from truncating the formatted plaintext text plus the key (both with the length of the aforementioned text String).
-- `formateaentrada`: Indicates whether the specified text should be formatted and the output dumped into the file specified by `ficherosalida`.
+#### 3.2. Config Class
 
-The Config class also has several constructors:
-- Default Constructor: Initializes all the strings to "" and all the booleans to true. `ficherosalida` and `clave` are set to "salida.txt" and "merida" respectively.
-- Parameterized Constructor (fichero_configuracion): Initializes all the data like the default constructor except for `fichero_configuracion`, which is set according to the parameter value.
-- Parameterized Constructor: All the attributes are specified as parameters.
+This class is responsible for reading and processing the configuration file. It contains the following methods:
 
-Additionally, this class contains a series of methods that are used for proper handling of the configuration file data:
-- `leerFichero`: Reads the configuration file specified by `fichero_configuracion`. It performs the following steps in order:
-  - Read a line. If it is blank or starts with the '#' character, discard it and move to the next line. Otherwise, process it.
-  - If the line starts with '@', it is a flag. Read the content after the '@'. If it contains the words 'salidapantalla', 'salidafichero', 'codifica', or 'traza' followed by 'ON' or 'OFF', process it. Otherwise, discard it.
-  - If the line starts with '&', it is a command. Read the content after the '&'.
-    - If it is 'autoclave', execute the method with the same name.
-    - If it is 'ficheroentrada', 'ficherosalida', 'clave', or 'formateaentrada', followed by a TXT file, process it. Otherwise, discard it.
-  If an exception is thrown, it means that the configuration file does not exist or that a required file for a command does not exist.
-- `autoclave`: Processes the 'autoclave' command. It reads the line and splits it into an array using whitespaces as the separator. If the array has two elements and the second element is 'ON' or 'OFF', assign the value to `codifica`. Otherwise, discard the command.
-- `ficheroEntrada`: Processes the 'ficheroentrada' command. It reads the line and splits it into an array using whitespaces as the separator. If the array has two elements and the second element is a valid TXT file, assign the value to `ficheroentrada`. Otherwise, discard the command.
-- `ficheroSalida`: Processes the 'ficherosalida' command. It reads the line and splits it into an array using whitespaces as the separator. If the array has two elements and the second element is a valid TXT file, assign the value to `ficherosalida`. Otherwise, discard the command.
-- `clave`: Processes the 'clave' command. It reads the line and splits it into an array using whitespaces as the separator. If the array has two elements and the second element is a valid character string, assign the value to `clave`. Otherwise, discard the command.
-- `formateaEntrada`: Processes the 'formateaentrada' command. It reads the line and splits it into an array using whitespaces as the separator. If the array has two elements and the second element is 'ON' or 'OFF', assign the value to `formateaentrada`. Otherwise, discard the command.
-- `mostrarContenido`: Displays the content of all the attributes of the class on the screen.
+- `LeerArchivoConfiguracion`: Reads the configuration file and returns its content as a string.
+- `ObtenerParametros`: Extracts the parameters from the configuration file and returns them as an array of strings.
+- `ProcesarParametros`: Processes the parameters and performs the corresponding actions based on their values.
 
-### AutoclaveMetodo Class <a name="autoclavemetodo-class"></a>
+The `ProcesarParametros` method includes a switch statement that evaluates the different parameter options. The available options are as follows:
 
-This class contains the main logic for the Autoclave method. It performs the encoding and decoding operations based on the given parameters and configuration. The class has the following methods:
-- `codifica`: Performs the encoding operation. It reads the input file, processes the content, applies the Autoclave encryption algorithm, and writes the output to the specified output file. If the `formateaentrada` flag is ON, it formats the input text before processing.
-- `decodifica`: Performs the decoding operation. It reads the input file, processes the content, applies the Autoclave decryption algorithm, and writes the output to the specified output file.
+- `ejecuta`: Executes the corresponding encryption or decryption method based on the given input.
+- `muestraAyuda`: Displays the program's help information.
+- `noValido`: Displays an error message indicating that the provided parameter is invalid.
+- `noExiste`: Displays an error message indicating that the configuration file does not exist.
 
-The AutoclaveMetodo class also has several helper methods to assist in the encoding and decoding operations:
-- `reiniciarContadores`: Resets the counters used during encoding or decoding.
-- `esNumero`: Checks if a given character is a number.
-- `esLetra`: Checks if a given character is a letter.
-- `posicionCaracter`: Gets the position of a character in the alphabet.
-- `caracterPosicion`: Gets the character at a given position in the alphabet.
-- `esMascara`: Checks if a given character is a mask.
-- `esValido`: Checks if a given character is valid for encoding/decoding.
-- `encodifica`: Applies the encoding algorithm to a given character.
-- `decodifica`: Applies the decoding algorithm to a given character.
-- `procesar`: Processes a given input character based on the encoding/decoding mode and the mask.
-- `ejecutar`: Executes the encoding/decoding operation on the input file and writes the output to the output file.
-- `escribeFichero`: Writes a given string to the output file.
-- `getContenidoFichero`: Retrieves the content of a file as a string.
+The `ProcesarParametros` method also includes a call to the appropriate encryption or decryption method based on the given input.
 
-## Conclusion
+#### 3.3. AutoclaveMethod Class
 
-The AutoClave project provides an implementation of the AutoClave encryption algorithm, which is a variant of the Vigenere cipher. The project consists of several classes that handle different aspects of the encryption process, including argument handling, configuration management, and the actual encoding/decoding operations. By following the provided documentation, users can effectively use the AutoClave program to encrypt and decrypt their messages.
+This class contains the implementation of the autoclave method, which is used for encryption and decryption. It includes the following methods:
 
-Please note that this documentation provides a high-level overview of the project and its components. For detailed implementation details, please refer to the actual source code and comments within the code.
+- `Autoclave`: Performs the encryption or decryption using the autoclave method. It takes the input text and a key as parameters and returns the result as a string.
+
+#### 3.4. AuxiliaryMethods Class
+
+This class contains various auxiliary methods used by the program. These methods include:
+
+- `ValidarArgumento`: Validates the input argument and returns a boolean value indicating whether the argument is valid.
+- `ObtenerArchivoConfiguracion`: Returns the name of the configuration file based on the input argument.
+- `MostrarAyuda`: Displays the program's help information.
+
+#### 3.5. Playfair Class
+
+This class contains the implementation of the Playfair cipher, which is used for encryption and decryption. It includes the following methods:
+
+- `GeneratePlayfairMatrix`: Generates the Playfair matrix based on a given key.
+- `Playfair`: Performs the encryption or decryption using the Playfair cipher. It takes the input text, a key, and a flag indicating whether it is encryption or decryption as parameters and returns the result as a string.
+
+#### 3.6. Caesar Class
+
+This class contains the implementation of the Caesar cipher, which is used for encryption and decryption. It includes the following methods:
+
+- `Caesar`: Performs the encryption or decryption using the Caesar cipher. It takes the input text, a key, and a flag indicating whether it is encryption or decryption as parameters and returns the result as a string.
+
+#### 3.7. Vatsayayana Class
+
+This class contains the implementation of the Vatsayayana cipher, which is used for encryption and decryption. It includes the following methods:
+
+- `Vatsayayana`: Performs the encryption or decryption using the Vatsayayana cipher. It takes the input text, a key, and a flag indicating whether it is encryption or decryption as parameters and returns the result as a string.
+
+### 4. Conclusions
+
+In conclusion, this program provides a comprehensive solution for generating secure and reliable encrypted messages using various encryption methods. It allows for easy encryption and decryption based on the provided input arguments and configuration file. By understanding the functionality and usage of each class and method, users can effectively utilize this program for their encryption needs.
+
+### 5. Bibliography
+
+- [Reference 1](link-to-reference-1)
+- [Reference 2](link-to-reference-2)
+- [Reference 3](link-to-reference-3)
+
