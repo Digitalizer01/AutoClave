@@ -8,14 +8,17 @@ import java.io.PrintWriter;
 import java.util.StringTokenizer;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
  * Clase que se encarga del tratado del fichero de configuración y realiza todas
  * las acciones que este dicta.
- *
  *
  */
 public class Config {
@@ -31,6 +34,9 @@ public class Config {
     private String clave_larga;
     private String formateaentrada;
 
+    private String alfabeto_Vatsayana;
+    private int clave_cesar;
+
     /**
      * Constructor por defecto de la clase.
      */
@@ -45,6 +51,9 @@ public class Config {
         clave = "merida";
         clave_larga = "";
         formateaentrada = "";
+
+        alfabeto_Vatsayana = "abcdefghijklmnñopqrstuvwxyz=";
+        clave_cesar = 5;
     }
 
     /**
@@ -66,6 +75,9 @@ public class Config {
         clave = "merida";
         clave_larga = "";
         formateaentrada = "";
+
+        alfabeto_Vatsayana = "abcdefghijklmnñopqrstuvwxyz=";
+        clave_cesar = 5;
     }
 
     /**
@@ -93,8 +105,10 @@ public class Config {
      * texto anteriormente mencionado).
      * @param formateaentrada Indica que debe formatearse el texto que indique y
      * volcar la salida en el fichero indicado por ficherosalida.
+     * @param alfabeto_Vatsayana Alfabeto Vatsayayana.
+     * @param clave_cesar Clave césar.
      */
-    public Config(String fichero_configuracion, boolean salidapantalla, boolean salidafichero, boolean codifica, boolean traza, String ficheroentrada, String ficherosalida, String clave, String clave_larga, String formateaentrada) {
+    public Config(String fichero_configuracion, boolean salidapantalla, boolean salidafichero, boolean codifica, boolean traza, String ficheroentrada, String ficherosalida, String clave, String clave_larga, String formateaentrada, String alfabeto_Vatsayana, int clave_cesar) {
         this.fichero_configuracion = fichero_configuracion;
         this.salidapantalla = salidapantalla;
         this.salidafichero = salidafichero;
@@ -105,6 +119,9 @@ public class Config {
         this.clave = clave;
         this.clave_larga = clave_larga;
         this.formateaentrada = formateaentrada;
+
+        this.alfabeto_Vatsayana = alfabeto_Vatsayana;
+        this.clave_cesar = clave_cesar;
     }
 
     /**
@@ -121,20 +138,19 @@ public class Config {
      * Si contiene las palabras 'salidapantalla', 'salidafichero', 'codifica' o
      * 'traza' seguido de 'ON' u 'OFF', se trata. De lo contrario, se descarta.
      *
-     * - Si la línea comienza por aspersan, es un comando. Lee lo que existe después.
-     * Si es 'autoclave', se ejecuta el método con el mismo nombre. Si es
-     * 'ficheroentrada', 'ficherosalida', 'clave' o 'formateaentrada', seguido
-     * de un fichero TXT, se trata. De lo contrario, se descarta.
+     * - Si la línea comienza por aspersan, es un comando. Lee lo que existe
+     * después. Si es 'autoclave', se ejecuta el método con el mismo nombre. Si
+     * es 'ficheroentrada', 'ficherosalida', 'clave' o 'formateaentrada',
+     * seguido de un fichero TXT, se trata. De lo contrario, se descarta.
      *
      */
     public void leerFichero() {
         BufferedReader objeto_lector_fichero_config = null;
-
+        Metodos_auxiliares metodo = new Metodos_auxiliares();
         // Tratamos de leer el fichero de configuración indicado por fichero_configuracion. Si no salta la excepción.
         try {
             String strCurrentLine;
-
-            objeto_lector_fichero_config = new BufferedReader(new InputStreamReader(new FileInputStream(fichero_configuracion), StandardCharsets.UTF_8));
+            objeto_lector_fichero_config = new BufferedReader(new InputStreamReader(new FileInputStream(fichero_configuracion), "UTF-8"));
 
             while ((strCurrentLine = objeto_lector_fichero_config.readLine()) != null) {
                 if (strCurrentLine.isEmpty() || (strCurrentLine.charAt(0) == '#')) {
@@ -150,38 +166,116 @@ public class Config {
                                 case "&":
                                     // tipoDato contiene lo que hay después de &
                                     String tipoComando = Tok.nextToken();
-                                    tipoComando = formatear(tipoComando);
+
+                                    Vatsayayana v = new Vatsayayana();
+                                    Playfair p = new Playfair();
+                                    Cesar c = new Cesar();
+                                    tipoComando = metodo.formatear(tipoComando);
                                     switch (tipoComando) {
+
+                                        case "vatsyayana":
+                                            v.Comando_vatsayayana(ficheroentrada, ficherosalida, alfabeto_Vatsayana, traza, codifica);
+                                            break;
+
+                                        case "alfabetovatsyayana":
+                                            if (Tok.hasMoreTokens()) {
+                                                String alfabeto = Tok.nextToken();
+                                                String a = v.Comando_alfabetovatsyayana(alfabeto, traza);
+                                                if (!a.equals(null)) {
+                                                    alfabeto_Vatsayana = a;
+                                                }
+                                            } else {
+                                                System.out.println("ERROR");
+                                            }
+                                            break;
+
+                                        case "generaalfabetovatsyayana":
+                                            v.Comando_generaalfabetovatsyayana(ficherosalida, traza);
+                                            break;
+
+                                        case "cargaalfabetovatsyayana":
+                                            if (!Tok.hasMoreTokens()) {
+                                                String a = v.Comando_cargaalfabetovatsyayana(ficheroentrada, traza);
+
+                                                if (!a.equals(null)) {
+                                                    alfabeto_Vatsayana = a;
+                                                }
+                                            } else {
+                                                System.out.println("ERROR");
+                                            }
+                                            break;
+
+                                        case "playfair":
+                                            if (Tok.hasMoreTokens()) {
+                                                String clave = Tok.nextToken();
+                                                if (codifica == true) {
+                                                    p.Comando_playfair_cifrar(ficheroentrada, ficherosalida, clave, traza);
+                                                } else {
+                                                    p.Comando_playfair_descifrar(ficheroentrada, ficherosalida, clave, traza);
+                                                }
+                                            } else {
+                                                System.out.println("ERROR");
+                                            }
+
+                                            break;
+
+                                        case "cargaclavecesar":
+                                            if (!Tok.hasMoreTokens()) {
+                                                int num = c.Comando_cargaclavecesar(ficheroentrada, traza);
+
+                                                if (num != 0) {
+                                                    clave_cesar = num;
+                                                }
+                                            } else {
+                                                System.out.println("ERROR");
+                                            }
+                                            break;
+
+                                        case "cesar":
+                                            if (!Tok.hasMoreTokens()) {
+                                                if (codifica == true) {
+                                                    c.Comando_cesar_cifrado(ficheroentrada, ficherosalida, clave_cesar, traza);
+                                                } else {
+                                                    c.Comando_cesar_descifrado(ficheroentrada, ficherosalida, clave_cesar, traza);
+                                                }
+                                            } else {
+                                                System.out.println("ERROR");
+                                            }
+
+                                            break;
+
+                                        case "clavecesar":
+                                            if (Tok.hasMoreTokens()) {
+                                                String clave = Tok.nextToken();
+                                                int num = c.Comando_clavecesar(clave, traza);
+
+                                                if (num != 0) {
+                                                    clave_cesar = num;
+                                                }
+                                            } else {
+                                                System.out.println("ERROR");
+                                            }
+                                            break;
+
+                                        case "generaclavecesar":
+                                            c.Comando_generaclavecesar(ficherosalida, traza);
+                                            break;
+
+                                        case "formateaentrada":
+                                            if (!Tok.hasMoreTokens()) {
+                                                Comando_formateaentrada();
+                                            } else {
+                                                System.out.println("ERROR");
+                                            }
+                                            break;
+
                                         // En caso de que tipoComando sea igual a ficheroentrada
                                         case "ficheroentrada":
                                             if (Tok.hasMoreTokens()) {
                                                 String fichero = Tok.nextToken();
-
-                                                BufferedReader objeto_lector_2 = null;
-
-                                                // Tratamos de leer el fichero indicado por fichero. Si no salta la excepción, ficheroentrada se iguala a fichero.
-                                                try {
-                                                    objeto_lector_2 = new BufferedReader(new InputStreamReader(new FileInputStream(fichero), StandardCharsets.UTF_8));
-                                                    ficheroentrada = fichero;
-
-                                                    // El fichero que fichero indica no existe.
-                                                } catch (IOException e) {
-                                                    if (traza == true) {
-                                                        System.out.println("-------- ERROR --------");
-                                                        System.out.println("No existe el fichero de entrada: " + fichero);
-                                                        System.out.println("-----------------------");
-                                                    }
-                                                } finally {
-
-                                                    try {
-                                                        if (objeto_lector_2 != null) {
-                                                            objeto_lector_2.close();
-                                                        }
-                                                    } catch (IOException ex) {
-                                                        ex.printStackTrace();
-                                                    }
-                                                }
-
+                                                Comando_ficheroentrada(fichero);
+                                            } else {
+                                                System.out.println("ERROR");
                                             }
                                             break;
 
@@ -189,45 +283,9 @@ public class Config {
                                         case "ficherosalida":
                                             if (Tok.hasMoreTokens()) {
                                                 String fichero = Tok.nextToken();
-                                                ficherosalida = fichero;
-                                                BufferedReader objeto_lector_2 = null;
-
-                                                // Tratamos de leer el fichero indicado por fichero para saber si existe o no. Si no existe, salta a la excepción.
-                                                try {
-                                                    objeto_lector_2 = new BufferedReader(new InputStreamReader(new FileInputStream(fichero), StandardCharsets.UTF_8));
-
-                                                    if (traza == true) {
-                                                        System.out.println("-------- ERROR --------");
-                                                        System.out.println("Existe el fichero de salida: " + fichero + " sera reescrito");
-                                                        System.out.println("-----------------------");
-                                                    }
-
-                                                    // El fichero que fichero indica no existe. Será creado.    
-                                                } catch (IOException e) {
-                                                    if (traza == true) {
-                                                        System.out.println("-------- ERROR --------");
-                                                        System.out.println("No existe el fichero de salida: " + fichero + " sera creado");
-                                                        System.out.println("-----------------------");
-                                                    }
-                                                    File archivo = new File(fichero);
-                                                    BufferedWriter bw;
-
-                                                    bw = new BufferedWriter(new FileWriter(archivo));
-                                                    bw.write("");
-
-                                                    bw.close();
-
-                                                } finally {
-
-                                                    try {
-                                                        if (objeto_lector_2 != null) {
-                                                            objeto_lector_2.close();
-                                                        }
-                                                    } catch (IOException ex) {
-                                                        ex.printStackTrace();
-                                                    }
-                                                }
-
+                                                Comando_ficherosalida(fichero);
+                                            } else {
+                                                System.out.println("ERROR");
                                             }
                                             break;
 
@@ -235,284 +293,24 @@ public class Config {
                                         case "clave":
                                             if (Tok.hasMoreTokens()) {
                                                 String clave_config = Tok.nextToken();
-                                                if (traza == true) {
-                                                    System.out.println("Clave que viene: " + clave_config);
-                                                }
-                                                // Formateamos la clave.
-                                                clave_config = formatear(clave_config);
-
-                                                // Si la clave contiene dos caracteres o más, se acepta. Si no, se descarta.
-                                                if (clave_config.length() >= 2) {
-                                                    if (traza == true) {
-                                                        System.out.println("Cargamos la nueva clave: " + clave_config);
-                                                    }
-                                                    clave = clave_config;
-                                                } else {
-                                                    if (traza == true) {
-                                                        System.out.println("No cambiamos la clave, pues es demasiado corta: " + clave_config);
-                                                    }
-                                                }
+                                                Comando_clave(clave_config);
                                             }
                                             break;
 
                                         // En caso de que tipoComando sea igual a formateaentrada   
-                                        case "formateaentrada":
+                                        case "formateaentrada_antiguo":
                                             if (Tok.hasMoreTokens()) {
                                                 String fichero = Tok.nextToken();
-
-                                                BufferedReader objecto_lector_2 = null;
-
-                                                // Se comprueba si existe el fichero de entrada a formatear.
-                                                // Si existe, se formatea y se guarda la salida (si salidafichero es true) en el fichero de salida indicado por ficherosalida.
-                                                // Si no existe, salta la excepción.
-                                                try {
-                                                    objecto_lector_2 = new BufferedReader(new InputStreamReader(new FileInputStream(fichero), StandardCharsets.UTF_8));
-
-                                                    String linea = "";
-                                                    String linea_siguiente = "";
-
-                                                    // Se leen todas las líneas que pueda tener el fichero de entrada.
-                                                    while ((linea_siguiente = objecto_lector_2.readLine()) != null) {
-                                                        linea = linea + linea_siguiente;
-                                                    }
-
-                                                    // Si el fichero no está en blanco.
-                                                    if (linea != null) {
-                                                        // Se cogen solo los primeros 1000 caracteres del fichero.
-                                                        linea = Truncar_Texto(linea, 1000);
-
-                                                        File archivo = new File(ficherosalida);
-                                                        BufferedWriter bw;
-
-                                                        bw = new BufferedWriter(new FileWriter(archivo));
-                                                        if (salidapantalla == true) {
-                                                            System.out.println("Fichero fuente antes de formatear: " + linea + "\n"
-                                                                    + "Vamos a formatear el fichero de entrada con los caracteres validos\n"
-                                                                    + "Tamaño del fichero:" + linea.length() + " caracteres\n"
-                                                                    + "Fichero formateado:" + formatear(linea));
-                                                        }
-
-                                                        // Se escribe el texto formateado en el fichero de salida.
-                                                        bw.write(formatear(linea));
-                                                        bw.close();
-
-                                                        // Si el fichero está en blanco.
-                                                    } else {
-
-                                                        File archivo = new File(ficherosalida);
-                                                        BufferedWriter bw;
-
-                                                        bw = new BufferedWriter(new FileWriter(archivo));
-                                                        if (salidapantalla == true) {
-                                                            System.out.println("Fichero fuente antes de formatear: " + "\n"
-                                                                    + "Vamos a formatear el fichero de entrada con los caracteres validos\n"
-                                                                    + "Tamaño del fichero:" + " caracteres\n"
-                                                                    + "Fichero formateado:");
-                                                        }
-                                                        bw.close();
-                                                    }
-
-                                                    // Salta la excepción si no existe el fichero de entrada a formatear.
-                                                } catch (IOException e) {
-                                                    if (traza == true) {
-                                                        System.out.println("-------- ERROR --------");
-                                                        System.out.println("No Existe el fichero de entrada a formatear: " + fichero);
-                                                        System.out.println("-----------------------");
-                                                    }
-                                                } finally {
-
-                                                    try {
-                                                        if (objecto_lector_2 != null) {
-                                                            objecto_lector_2.close();
-                                                        }
-                                                    } catch (IOException ex) {
-                                                        ex.printStackTrace();
-                                                    }
-                                                }
-
+                                                Comando_formateaentrada_antiguo(fichero);
+                                            } else {
+                                                System.out.println("ERROR");
                                             }
-
                                             break;
 
                                         // En caso de que tipoComando sea igual a autoclave
                                         case "autoclave":
 
-                                            // Si se trata de codificar el texto que existe en fichero de entrada.
-                                            if (codifica == true) {
-                                                BufferedReader objeto_lector_2 = null;
-
-                                                // Tratamos de leer el fichero indicado por ficheroentrada. Si no salta la excepción.
-                                                try {
-                                                    objeto_lector_2 = new BufferedReader(new InputStreamReader(new FileInputStream(ficheroentrada), StandardCharsets.UTF_8));
-
-                                                    String linea = "";
-                                                    String linea_siguiente = "";
-                                                    // Se leen todas las líneas que pueda tener el fichero de entrada.
-                                                    while ((linea_siguiente = objeto_lector_2.readLine()) != null) {
-                                                        linea = linea + linea_siguiente;
-                                                    }
-
-                                                    // Si el fichero no está en blanco.
-                                                    if (linea != null) {
-                                                        // Se cogen solo los primeros 1000 caracteres del fichero.
-                                                        linea = Truncar_Texto(linea, 1000);
-
-                                                        AutoclaveMetodo a = new AutoclaveMetodo();
-
-                                                        if (salidapantalla == true) {
-                                                            System.out.println("Vamos a cifrar con AutoClave");
-                                                            System.out.println("Fichero a traducir:" + linea);
-                                                            System.out.println("Texto cifrado es: " + linea);
-                                                        }
-
-                                                        linea = linea.replaceAll("[^a-z]", "");
-
-                                                        linea = formatear(linea);
-                                                        String combinacion_sin_truncar = (clave + linea);
-                                                        String texto_truncado = a.Truncar_Texto(combinacion_sin_truncar, linea.length());
-                                                        clave_larga = texto_truncado;
-                                                        String texto_cifrado = a.cifrar_mensaje(linea, clave);
-                                                        if (salidapantalla == true) {
-                                                            System.out.println("Clave:          " + texto_truncado);
-                                                            System.out.println("Texto  cifrado: " + texto_cifrado);
-                                                        }
-
-                                                        if (salidafichero == true) {
-                                                            File archivo = new File(ficherosalida);
-                                                            BufferedWriter bw;
-
-                                                            bw = new BufferedWriter(new FileWriter(archivo));
-
-                                                            bw.write(texto_cifrado);
-                                                            bw.close();
-                                                        }
-
-                                                        // Si el fichero está en blanco.
-                                                    } else {
-                                                        if (salidapantalla == true) {
-
-                                                            System.out.println("Vamos a cifrar con AutoClave");
-                                                            System.out.println("Fichero a traducir:");
-                                                            System.out.println("Texto cifrado es: ");
-                                                        }
-
-                                                        if (salidapantalla == true) {
-                                                            System.out.println("Clave:          " + clave);
-                                                            System.out.println("Texto  cifrado: ");
-                                                        }
-
-                                                        if (salidafichero == true) {
-                                                            File archivo = new File(ficherosalida);
-                                                            BufferedWriter bw;
-
-                                                            bw = new BufferedWriter(new FileWriter(archivo));
-
-                                                            bw.write("");
-                                                            bw.close();
-                                                        }
-
-                                                    }
-
-                                                    // Salta la excepción si no existe el fichero de entrada.
-                                                } catch (IOException e) {
-                                                    if (traza == true) {
-                                                        System.out.println("-------- ERROR --------");
-                                                        System.out.println("No existe el fichero de entrada a tratar: " + ficheroentrada);
-                                                        System.out.println("-----------------------");
-                                                    }
-                                                } finally {
-
-                                                    try {
-                                                        if (objeto_lector_2 != null) {
-                                                            objeto_lector_2.close();
-                                                        }
-                                                    } catch (IOException ex) {
-                                                        ex.printStackTrace();
-                                                    }
-                                                }
-
-                                                // Si se trata de decodificar el texto que existe en fichero de entrada.    
-                                            } else {
-                                                BufferedReader objeto_lector_2 = null;
-
-                                                // Tratamos de leer el fichero indicado por ficheroentrada. Si no salta la excepción.
-                                                try {
-                                                    objeto_lector_2 = new BufferedReader(new InputStreamReader(new FileInputStream(ficheroentrada), StandardCharsets.UTF_8));
-
-                                                    String linea = "";
-                                                    String linea_siguiente = "";
-                                                    // Se leen todas las líneas que pueda tener el fichero de entrada.
-                                                    while ((linea_siguiente = objeto_lector_2.readLine()) != null) {
-                                                        linea = linea + linea_siguiente;
-                                                    }
-
-                                                    // Si el fichero no está en blanco.
-                                                    if (linea != null) {
-                                                        AutoclaveMetodo a = new AutoclaveMetodo();
-
-                                                        String combinacion_sin_truncar = (clave + linea);
-                                                        String texto_truncado = clave_larga;
-
-                                                        String texto_descifrado = a.descifrar_mensaje(linea, clave_larga);
-
-                                                        if (salidapantalla == true) {
-
-                                                            System.out.println("Vamos a descifrar con AutoClave");
-                                                            System.out.println("Fichero a traducir:" + linea);
-                                                            System.out.println("Texto en claro: " + linea);
-                                                            System.out.println("Clave:          " + texto_truncado);
-                                                            System.out.println("Texto  descifrado: " + texto_descifrado);
-                                                        }
-                                                        File archivo = new File(ficherosalida);
-                                                        BufferedWriter bw;
-
-                                                        bw = new BufferedWriter(new FileWriter(archivo));
-
-                                                        bw.write(texto_descifrado);
-                                                        bw.close();
-
-                                                        // Si el fichero está en blanco.
-                                                    } else {
-
-                                                        String combinacion_sin_truncar = (clave + linea);
-                                                        String texto_truncado = clave_larga;
-
-                                                        if (salidapantalla == true) {
-
-                                                            System.out.println("Vamos a descifrar con AutoClave");
-                                                            System.out.println("Fichero a traducir:");
-                                                            System.out.println("Texto en claro: ");
-                                                            System.out.println("Clave:          " + clave);
-                                                            System.out.println("Texto  descifrado: ");
-                                                        }
-                                                        File archivo = new File(ficherosalida);
-                                                        BufferedWriter bw;
-
-                                                        bw = new BufferedWriter(new FileWriter(archivo));
-
-                                                        bw.write("");
-                                                        bw.close();
-                                                    }
-
-                                                    // Salta la excepción si no existe el fichero de entrada.
-                                                } catch (IOException e) {
-                                                    if (traza == true) {
-                                                        System.out.println("-------- ERROR --------");
-                                                        System.out.println("No existe el fichero de entrada a formatear: " + ficheroentrada);
-                                                        System.out.println("-----------------------");
-                                                    }
-
-                                                } finally {
-
-                                                    try {
-                                                        if (objeto_lector_2 != null) {
-                                                            objeto_lector_2.close();
-                                                        }
-                                                    } catch (IOException ex) {
-                                                        ex.printStackTrace();
-                                                    }
-                                                }
-                                            }
+                                            Comando_autoclave();
 
                                             break;
 
@@ -526,7 +324,8 @@ public class Config {
                                 // En caso de bandera:
                                 case "@":
                                     String tipoBandera = Tok.nextToken();
-                                    tipoBandera = formatear(tipoBandera);
+
+                                    tipoBandera = metodo.formatear(tipoBandera);
                                     switch (tipoBandera) {
 
                                         // En caso de que tipoBandera sea igual a salidapantalla
@@ -534,14 +333,7 @@ public class Config {
 
                                             if (Tok.hasMoreTokens()) {
                                                 String confirmacion = Tok.nextToken();
-                                                confirmacion = formatear(confirmacion);
-                                                if (confirmacion.equals("on")) {
-                                                    salidapantalla = true;
-                                                } else {
-                                                    if (confirmacion.equals("off")) {
-                                                        salidapantalla = false;
-                                                    }
-                                                }
+                                                Bandera_salidapantalla(confirmacion);
                                             }
 
                                             break;
@@ -550,14 +342,7 @@ public class Config {
                                         case "salidafichero":
                                             if (Tok.hasMoreTokens()) {
                                                 String confirmacion = Tok.nextToken();
-                                                confirmacion = formatear(confirmacion);
-                                                if (confirmacion.equals("on")) {
-                                                    salidafichero = true;
-                                                } else {
-                                                    if (confirmacion.equals("off")) {
-                                                        salidafichero = false;
-                                                    }
-                                                }
+                                                Bandera_salidafichero(confirmacion);
                                             }
                                             break;
 
@@ -565,14 +350,7 @@ public class Config {
                                         case "codifica":
                                             if (Tok.hasMoreTokens()) {
                                                 String confirmacion = Tok.nextToken();
-                                                confirmacion = formatear(confirmacion);
-                                                if (confirmacion.equals("on")) {
-                                                    codifica = true;
-                                                } else {
-                                                    if (confirmacion.equals("off")) {
-                                                        codifica = false;
-                                                    }
-                                                }
+                                                Bandera_codifica(confirmacion);
                                             }
                                             break;
 
@@ -580,14 +358,7 @@ public class Config {
                                         case "traza":
                                             if (Tok.hasMoreTokens()) {
                                                 String confirmacion = Tok.nextToken();
-                                                confirmacion = formatear(confirmacion);
-                                                if (confirmacion.equals("on")) {
-                                                    traza = true;
-                                                } else {
-                                                    if (confirmacion.equals("off")) {
-                                                        traza = false;
-                                                    }
-                                                }
+                                                Bandera_traza(confirmacion);
                                             }
                                             break;
 
@@ -620,42 +391,6 @@ public class Config {
             }
         }
 
-    }
-
-    /**
-     * Método que formatea la entrada dada por parámetros eliminando los
-     * espacios y los caracteres que no estén de la 'a' a la 'z' sin contar 'ñ'
-     * y poniendo el resultado en minúscula.
-     *
-     * @param texto Parámetro que indica el que se introduce para su formateo.
-     * @return Retorna el texto introducido por parámetro pero formateado.
-     */
-    public String formatear(String texto) {
-        String texto_formateado = "";
-        texto_formateado = texto.replaceAll("\\s", ""); // Eliminamos los espacios
-
-        texto_formateado = texto_formateado.replaceAll("[^a-zA-Z]", "");
-        texto_formateado = texto_formateado.toLowerCase();
-        return texto_formateado;
-    }
-
-    /**
-     * Método que trunca un String dado por parámatros tanto como indique la
-     * longitud introducida por parámetros.
-     *
-     * @param texto Parámetro que indica el texto que va a truncarse.
-     * @param longitud Parámetro que indica la longitud a la que el texto
-     * introducido por parámetros será truncado.
-     * @return Retorna el texto introducido por parámetros pero truncado hasta
-     * la longitud indicada por parámetros.
-     */
-    public String Truncar_Texto(String texto, int longitud) {
-        // Ensure String length is longer than requested size.
-        if (texto.length() > longitud) {
-            return texto.substring(0, longitud);
-        } else {
-            return texto;
-        }
     }
 
     /**
@@ -808,6 +543,532 @@ public class Config {
      */
     public void setFormateaentrada(String formateaentrada) {
         this.formateaentrada = formateaentrada;
+    }
+
+    /**
+     * Método que obtiene el alfabeto Vatsayayana.
+     *
+     * @return Alfabeto Vatsayayana.
+     */
+    public String getAlfabeto_Vatsayana() {
+        return alfabeto_Vatsayana;
+    }
+
+    /**
+     * Método que asigna el alfabeto Vatsayayana.
+     *
+     * @param alfabeto_Vatsayana
+     */
+    public void setAlfabeto_Vatsayana(String alfabeto_Vatsayana) {
+        this.alfabeto_Vatsayana = alfabeto_Vatsayana;
+    }
+
+    /**
+     * Método que formatea lo que hay en el ficheroentrada.
+     */
+    public void Comando_formateaentrada() {
+        String fichero = ficheroentrada;
+        Metodos_auxiliares metodo = new Metodos_auxiliares();
+        BufferedReader objecto_lector_2 = null;
+
+        // Se comprueba si existe el fichero de entrada a formatear.
+        // Si existe, se formatea y se guarda la salida (si salidafichero es true) en el fichero de salida indicado por ficherosalida.
+        // Si no existe, salta la excepción.
+        try {
+            objecto_lector_2 = new BufferedReader(new InputStreamReader(new FileInputStream(fichero), "UTF-8"));
+
+            String linea = "";
+            String linea_siguiente = "";
+
+            // Se leen todas las líneas que pueda tener el fichero de entrada.
+            while ((linea_siguiente = objecto_lector_2.readLine()) != null) {
+                linea = linea + linea_siguiente;
+            }
+
+            // Si el fichero no está en blanco.
+            if (linea != null) {
+                // Se cogen solo los primeros 1000 caracteres del fichero.
+                linea = metodo.Truncar_Texto(linea, 1000);
+
+                File archivo = new File(ficherosalida);
+                try (OutputStreamWriter bw = new OutputStreamWriter(new FileOutputStream(archivo), "UTF-8")) {
+                    if (salidapantalla == true) {
+                        System.out.println("Fichero fuente antes de formatear: " + linea + "\n"
+                                + "Vamos a formatear el fichero de entrada con los caracteres validos\n"
+                                + "Tamaño del fichero:" + linea.length() + " caracteres\n"
+                                        + "Fichero formateado:" + metodo.formatear_2(linea));
+                    }   // Se escribe el texto formateado en el fichero de salida.
+                    bw.write(metodo.formatear_2(linea));
+                    // Si el fichero está en blanco.
+                }
+            } else {
+
+                File archivo = new File(ficherosalida);
+                //BufferedWriter bw_1;
+                //bw = new BufferedWriter(new FileWriter(archivo));
+                try (OutputStreamWriter bw = new OutputStreamWriter(new FileOutputStream(archivo), "UTF-8")) {
+                    //bw = new BufferedWriter(new FileWriter(archivo));
+                    if (salidapantalla == true) {
+                        System.out.println("Fichero fuente antes de formatear: " + "\n"
+                                + "Vamos a formatear el fichero de entrada con los caracteres validos\n"
+                                + "Tamaño del fichero:" + " caracteres\n"
+                                + "Fichero formateado:");
+                    }
+                }
+            }
+
+            // Salta la excepción si no existe el fichero de entrada a formatear.
+        } catch (IOException e) {
+            if (traza == true) {
+                System.out.println("-------- ERROR --------");
+                System.out.println("No Existe el fichero de entrada a formatear: " + fichero);
+                System.out.println("-----------------------");
+            }
+        } finally {
+
+            try {
+                if (objecto_lector_2 != null) {
+                    objecto_lector_2.close();
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+
+    }
+
+    /**
+     * Método que asigna el fichero de entrada.
+     *
+     * @param fichero Fichero de entrada.
+     */
+    public void Comando_ficheroentrada(String fichero) {
+        BufferedReader objeto_lector_2 = null;
+
+        // Tratamos de leer el fichero indicado por fichero. Si no salta la excepción, ficheroentrada se iguala a fichero.
+        try {
+            objeto_lector_2 = new BufferedReader(new InputStreamReader(new FileInputStream(fichero), StandardCharsets.UTF_8));
+            ficheroentrada = fichero;
+
+            // El fichero que fichero indica no existe.
+        } catch (IOException e) {
+            if (traza == true) {
+                System.out.println("-------- ERROR --------");
+                System.out.println("No existe el fichero de entrada: " + fichero);
+                System.out.println("-----------------------");
+            }
+        } finally {
+
+            try {
+                if (objeto_lector_2 != null) {
+                    objeto_lector_2.close();
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+
+    }
+
+    /**
+     * Método que asigna el fichero de salida.
+     *
+     * @param fichero Fichero de salida.
+     * @throws IOException
+     */
+    public void Comando_ficherosalida(String fichero) throws IOException {
+        ficherosalida = fichero;
+        BufferedReader objeto_lector_2 = null;
+
+        // Tratamos de leer el fichero indicado por fichero para saber si existe o no. Si no existe, salta a la excepción.
+        try {
+            objeto_lector_2 = new BufferedReader(new InputStreamReader(new FileInputStream(fichero), StandardCharsets.UTF_8));
+
+            if (traza == true) {
+                System.out.println("-------- ERROR --------");
+                System.out.println("Existe el fichero de salida: " + fichero + " sera reescrito");
+                System.out.println("-----------------------");
+            }
+
+            // El fichero que fichero indica no existe. Será creado.    
+        } catch (IOException e) {
+            if (traza == true) {
+                System.out.println("-------- ERROR --------");
+                System.out.println("No existe el fichero de salida: " + fichero + " sera creado");
+                System.out.println("-----------------------");
+            }
+            File archivo = new File(fichero);
+            BufferedWriter bw;
+
+            bw = new BufferedWriter(new FileWriter(archivo));
+            bw.write("");
+
+            bw.close();
+
+        } finally {
+
+            try {
+                if (objeto_lector_2 != null) {
+                    objeto_lector_2.close();
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * Método que carga la clave.
+     *
+     * @param clave_config Clave.
+     */
+    public void Comando_clave(String clave_config) {
+        if (traza == true) {
+            System.out.println("Clave que viene: " + clave_config);
+        }
+        // Formateamos la clave.
+        Metodos_auxiliares metodo = new Metodos_auxiliares();
+        clave_config = metodo.formatear(clave_config);
+
+        // Si la clave contiene dos caracteres o más, se acepta. Si no, se descarta.
+        if (clave_config.length() >= 2) {
+            if (traza == true) {
+                System.out.println("Cargamos la nueva clave: " + clave_config);
+            }
+            clave = clave_config;
+        } else {
+            if (traza == true) {
+                System.out.println("No cambiamos la clave, pues es demasiado corta: " + clave_config);
+            }
+        }
+    }
+
+    /**
+     * Método antiguo de formateado de texto del fichero de entrada.
+     *
+     * @param fichero Fichero de entrada.
+     */
+    public void Comando_formateaentrada_antiguo(String fichero) {
+        BufferedReader objecto_lector_2 = null;
+        Metodos_auxiliares metodo = new Metodos_auxiliares();
+        // Se comprueba si existe el fichero de entrada a formatear.
+        // Si existe, se formatea y se guarda la salida (si salidafichero es true) en el fichero de salida indicado por ficherosalida.
+        // Si no existe, salta la excepción.
+        try {
+            objecto_lector_2 = new BufferedReader(new InputStreamReader(new FileInputStream(fichero), StandardCharsets.UTF_8));
+
+            String linea = "";
+            String linea_siguiente = "";
+
+            // Se leen todas las líneas que pueda tener el fichero de entrada.
+            while ((linea_siguiente = objecto_lector_2.readLine()) != null) {
+                linea = linea + linea_siguiente;
+            }
+
+            // Si el fichero no está en blanco.
+            if (linea != null) {
+                // Se cogen solo los primeros 1000 caracteres del fichero.
+                linea = metodo.Truncar_Texto(linea, 1000);
+
+                File archivo = new File(ficherosalida);
+                BufferedWriter bw;
+
+                bw = new BufferedWriter(new FileWriter(archivo));
+                if (salidapantalla == true) {
+                    System.out.println("Fichero fuente antes de formatear: " + linea + "\n"
+                            + "Vamos a formatear el fichero de entrada con los caracteres validos\n"
+                            + "Tamaño del fichero:" + linea.length() + " caracteres\n"
+                            + "Fichero formateado:" + metodo.formatear(linea));
+                }
+
+                // Se escribe el texto formateado en el fichero de salida.
+                bw.write(metodo.formatear(linea));
+                bw.close();
+
+                // Si el fichero está en blanco.
+            } else {
+
+                File archivo = new File(ficherosalida);
+                BufferedWriter bw;
+
+                bw = new BufferedWriter(new FileWriter(archivo));
+                if (salidapantalla == true) {
+                    System.out.println("Fichero fuente antes de formatear: " + "\n"
+                            + "Vamos a formatear el fichero de entrada con los caracteres validos\n"
+                            + "Tamaño del fichero:" + " caracteres\n"
+                            + "Fichero formateado:");
+                }
+                bw.close();
+            }
+
+            // Salta la excepción si no existe el fichero de entrada a formatear.
+        } catch (IOException e) {
+            if (traza == true) {
+                System.out.println("-------- ERROR --------");
+                System.out.println("No Existe el fichero de entrada a formatear: " + fichero);
+                System.out.println("-----------------------");
+            }
+        } finally {
+
+            try {
+                if (objecto_lector_2 != null) {
+                    objecto_lector_2.close();
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+
+    }
+
+    /**
+     * Método que se encarga del cifrado/descifrado de autoclave.
+     */
+    public void Comando_autoclave() {
+        Metodos_auxiliares metodo = new Metodos_auxiliares();
+        // Si se trata de codificar el texto que existe en fichero de entrada.
+        if (codifica == true) {
+            BufferedReader objeto_lector_2 = null;
+
+            // Tratamos de leer el fichero indicado por ficheroentrada. Si no salta la excepción.
+            try {
+                objeto_lector_2 = new BufferedReader(new InputStreamReader(new FileInputStream(ficheroentrada), StandardCharsets.UTF_8));
+
+                String linea = "";
+                String linea_siguiente = "";
+                // Se leen todas las líneas que pueda tener el fichero de entrada.
+                while ((linea_siguiente = objeto_lector_2.readLine()) != null) {
+                    linea = linea + linea_siguiente;
+                }
+
+                // Si el fichero no está en blanco.
+                if (linea != null) {
+                    // Se cogen solo los primeros 1000 caracteres del fichero.
+                    linea = metodo.Truncar_Texto(linea, 1000);
+
+                    AutoclaveMetodo a = new AutoclaveMetodo();
+
+                    if (salidapantalla == true) {
+                        System.out.println("Vamos a cifrar con AutoClave");
+                        System.out.println("Fichero a traducir:" + linea);
+                        System.out.println("Texto cifrado es: " + linea);
+                    }
+
+                    linea = linea.replaceAll("[^a-z]", "");
+                    linea = metodo.formatear(linea);
+                    String combinacion_sin_truncar = (clave + linea);
+                    String texto_truncado = a.Truncar_Texto(combinacion_sin_truncar, linea.length());
+                    clave_larga = texto_truncado;
+                    String texto_cifrado = a.cifrar_mensaje(linea, clave);
+                    if (salidapantalla == true) {
+                        System.out.println("Clave:          " + texto_truncado);
+                        System.out.println("Texto  cifrado: " + texto_cifrado);
+                    }
+
+                    if (salidafichero == true) {
+                        File archivo = new File(ficherosalida);
+                        BufferedWriter bw;
+
+                        bw = new BufferedWriter(new FileWriter(archivo));
+
+                        bw.write(texto_cifrado);
+                        bw.close();
+                    }
+
+                    // Si el fichero está en blanco.
+                } else {
+                    if (salidapantalla == true) {
+
+                        System.out.println("Vamos a cifrar con AutoClave");
+                        System.out.println("Fichero a traducir:");
+                        System.out.println("Texto cifrado es: ");
+                    }
+
+                    if (salidapantalla == true) {
+                        System.out.println("Clave:          " + clave);
+                        System.out.println("Texto  cifrado: ");
+                    }
+
+                    if (salidafichero == true) {
+                        File archivo = new File(ficherosalida);
+                        BufferedWriter bw;
+
+                        bw = new BufferedWriter(new FileWriter(archivo));
+
+                        bw.write("");
+                        bw.close();
+                    }
+
+                }
+
+                // Salta la excepción si no existe el fichero de entrada.
+            } catch (IOException e) {
+                if (traza == true) {
+                    System.out.println("-------- ERROR --------");
+                    System.out.println("No existe el fichero de entrada a tratar: " + ficheroentrada);
+                    System.out.println("-----------------------");
+                }
+            } finally {
+
+                try {
+                    if (objeto_lector_2 != null) {
+                        objeto_lector_2.close();
+                    }
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+
+            // Si se trata de decodificar el texto que existe en fichero de entrada.    
+        } else {
+            BufferedReader objeto_lector_2 = null;
+
+            // Tratamos de leer el fichero indicado por ficheroentrada. Si no salta la excepción.
+            try {
+                objeto_lector_2 = new BufferedReader(new InputStreamReader(new FileInputStream(ficheroentrada), StandardCharsets.UTF_8));
+
+                String linea = "";
+                String linea_siguiente = "";
+                // Se leen todas las líneas que pueda tener el fichero de entrada.
+                while ((linea_siguiente = objeto_lector_2.readLine()) != null) {
+                    linea = linea + linea_siguiente;
+                }
+
+                // Si el fichero no está en blanco.
+                if (linea != null) {
+                    AutoclaveMetodo a = new AutoclaveMetodo();
+
+                    String combinacion_sin_truncar = (clave + linea);
+                    String texto_truncado = clave_larga;
+
+                    String texto_descifrado = a.descifrar_mensaje(linea, clave_larga);
+
+                    if (salidapantalla == true) {
+
+                        System.out.println("Vamos a descifrar con AutoClave");
+                        System.out.println("Fichero a traducir:" + linea);
+                        System.out.println("Texto en claro: " + linea);
+                        System.out.println("Clave:          " + texto_truncado);
+                        System.out.println("Texto  descifrado: " + texto_descifrado);
+                    }
+                    File archivo = new File(ficherosalida);
+                    BufferedWriter bw;
+
+                    bw = new BufferedWriter(new FileWriter(archivo));
+
+                    bw.write(texto_descifrado);
+                    bw.close();
+
+                    // Si el fichero está en blanco.
+                } else {
+
+                    String combinacion_sin_truncar = (clave + linea);
+                    String texto_truncado = clave_larga;
+
+                    if (salidapantalla == true) {
+
+                        System.out.println("Vamos a descifrar con AutoClave");
+                        System.out.println("Fichero a traducir:");
+                        System.out.println("Texto en claro: ");
+                        System.out.println("Clave:          " + clave);
+                        System.out.println("Texto  descifrado: ");
+                    }
+                    File archivo = new File(ficherosalida);
+                    BufferedWriter bw;
+
+                    bw = new BufferedWriter(new FileWriter(archivo));
+
+                    bw.write("");
+                    bw.close();
+                }
+
+                // Salta la excepción si no existe el fichero de entrada.
+            } catch (IOException e) {
+                if (traza == true) {
+                    System.out.println("-------- ERROR --------");
+                    System.out.println("No existe el fichero de entrada a formatear: " + ficheroentrada);
+                    System.out.println("-----------------------");
+                }
+
+            } finally {
+
+                try {
+                    if (objeto_lector_2 != null) {
+                        objeto_lector_2.close();
+                    }
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /**
+     * Método que carga el boolean salidapantalla.
+     *
+     * @param confirmacion ON=true, OFF=false
+     */
+    public void Bandera_salidapantalla(String confirmacion) {
+        Metodos_auxiliares metodo = new Metodos_auxiliares();
+        confirmacion = metodo.formatear(confirmacion);
+        if (confirmacion.equals("on")) {
+            salidapantalla = true;
+        } else {
+            if (confirmacion.equals("off")) {
+                salidapantalla = false;
+            }
+        }
+    }
+
+    /**
+     * Método que carga el boolean salidafichero.
+     *
+     * @param confirmacion ON=true, OFF=false
+     */
+    public void Bandera_salidafichero(String confirmacion) {
+        Metodos_auxiliares metodo = new Metodos_auxiliares();
+        confirmacion = metodo.formatear(confirmacion);
+        if (confirmacion.equals("on")) {
+            salidafichero = true;
+        } else {
+            if (confirmacion.equals("off")) {
+                salidafichero = false;
+            }
+        }
+    }
+
+    /**
+     * Método que carga el boolean codifica.
+     *
+     * @param confirmacion ON=true, OFF=false
+     */
+    public void Bandera_codifica(String confirmacion) {
+        Metodos_auxiliares metodo = new Metodos_auxiliares();
+        confirmacion = metodo.formatear(confirmacion);
+        if (confirmacion.equals("on")) {
+            codifica = true;
+        } else {
+            if (confirmacion.equals("off")) {
+                codifica = false;
+            }
+        }
+    }
+
+    /**
+     * Método que carga el boolean traza.
+     *
+     * @param confirmacion ON=true, OFF=false
+     */
+    public void Bandera_traza(String confirmacion) {
+        Metodos_auxiliares metodo = new Metodos_auxiliares();
+        confirmacion = metodo.formatear(confirmacion);
+        if (confirmacion.equals("on")) {
+            traza = true;
+        } else {
+            if (confirmacion.equals("off")) {
+                traza = false;
+            }
+        }
     }
 
 }

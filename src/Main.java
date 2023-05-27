@@ -18,7 +18,6 @@ import java.util.StringTokenizer;
  * parámetro, este devolverá un mensaje indicando la sintaxis que debe seguir el
  * usuario.
  *
- *
  */
 public class Main {
 

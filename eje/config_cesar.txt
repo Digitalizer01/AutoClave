@@ -1,0 +1,14 @@
+@ codifica ON
+
+& ficheroentrada clave_cesar.txt
+
+& cargaclavecesar
+
+& generaclavecesar
+
+& clavecesar 6
+
+& ficheroentrada quijote1.txt
+
+& ficherosalida alfabeto_vatsyayana2.txt
+& cesar

@@ -1,0 +1,41 @@
+#comienza el fichero de configuracion de P2 SI 2020 para corregir la practica
+#corrige PLAYFAIR
+#version 25 noviembre 2020
+
+#probando las banderas
+@ traza ON
+
+# claves invalidas
+& playfair o3bcd
+& playfair o$la
+& playfair abcdefghijklmnñopqRstuvwxyz;.
+
+
+#probando los comandos
+# formatear la entrada
+
+& ficheroentrada ./1juan/fuentes/quijoteSucio.txt
+& ficherosalida ./1juan/parciales/quijoteformateado2.txt
+& formateaentrada
+
+#Fichero a codificar
+& ficheroentrada  ./1juan/parciales/quijoteformateado2.txt
+& ficherosalida  ./1juan/playfair/quijote-cifrado-p.txt
+
+
+@ codifica ON
+& playfair rosa.li;
+
+& ficheroentrada  ./1juan/playfair/quijote-cifrado-p.txt
+& ficherosalida   ./1juan/finales/quijoteRestaurado-p.txt
+@ codifica OFF
+
+
+#intentamos cambiar a clave invalida
+& playfair o$la
+
+& playfair rosa.li;
+
+
+
+# fin del fichero de configuracion

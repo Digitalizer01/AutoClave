@@ -1,0 +1,15 @@
+Autor: Juan Arias Masa
+Fecha: 18-oct-2020
+Revision:
+
+ejemplo de ejecucion de la practica 2 de Seguridad de la Informaciin Curso 2020-21
+la ejecucion termina el 10 de diciembre de 2020
+
+en probar_v.bat se puede probar un ejemplo de configuracion de vatsyayana
+en probar_p.bat se puede probar un ejemplo de configuracion de playfair
+
+posible llamada:
+> java -jar P2_SI.2020_en.jar -f config.txt
+
+tambien se puede llamar con el fichero bat:
+>P2_SI.2020 <intro>

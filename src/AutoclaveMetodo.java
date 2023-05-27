@@ -2,7 +2,6 @@
 /**
  * Clase que se encarga de realizar las operaciones de Autoclave.
  *
- *
  */
 public class AutoclaveMetodo {
 

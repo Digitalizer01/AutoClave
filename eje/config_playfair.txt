@@ -1,0 +1,29 @@
+#comienza el fichero de configuracion de P2 SI 2020
+& ficheroentrada quijote1.txt
+& ficherosalida quijoteformateado.txt
+& formateaentrada
+
+#Fichero a codificar
+& ficheroentrada quijoteformateado.txt
+& ficherosalida salida.txt
+
+
+
+
+@ codifica ON
+#claves invalidas:
+& playfair medida
+& playfair o$la
+& playfair abcdefghijklmnñopqrstuvwxyz;.
+#clave valida:
+& playfair marco.s
+
+& ficheroentrada salida.txt
+& ficherosalida quijoteRestaurado.txt
+@ codifica OFF
+
+& playfair marco.s
+
+
+
+# fin del fichero de configuracion

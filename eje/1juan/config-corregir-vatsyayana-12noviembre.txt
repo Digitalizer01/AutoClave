@@ -1,0 +1,58 @@
+#comienza el fichero de configuracion de P2 SI 2020 para corregir la practica
+#corrige VATSYAYA
+#version 12 noviembre 2020
+
+#probando las banderas
+@ traza ON
+
+& ficherosalida ./1juan/vatsyayana/alfabeto_vatsyayana1.txt
+& genera_alfabeto_vatsyayana
+
+& ficherosalida ./1juan/vatsyayana/alfabeto_vatsyayana2.txt
+& genera_alfabeto_vatsyayana
+& ficheroentrada ./1juan/vatsyayana/alfabeto_vatsyayana1.txt
+& carga_alfabeto_vatsyayana
+
+#probando los comandos
+# formatear la entrada
+
+& ficheroentrada ./1juan/fuentes/quijoteSucio.txt
+& ficherosalida ./1juan/parciales/quijoteformateado1.txt
+& formateaentrada
+
+#Fichero a codificar
+& ficheroentrada  ./1juan/parciales/quijoteformateado1.txt
+& ficherosalida  ./1juan/vatsyayana/quijote-cifrado-v.txt
+
+
+@ codifica ON
+& Vatsyayana
+
+& ficheroentrada  ./1juan/vatsyayana/quijote-cifrado-v.txt
+& ficherosalida   ./1juan/finales/quijoteRestaurado-v.txt
+@ codifica OFF
+
+& Vatsyayana
+
+
+#Fichero a codificar
+& ficheroentrada  ./1juan/parciales/quijoteformateado1.txt
+& ficherosalida  ./1juan/vatsyayana/quijote-cifrado-v.txt
+
+
+@ codifica ON
+& Vatsyayana
+
+& ficheroentrada  ./1juan/vatsyayana/quijote-cifrado-v.txt
+& ficherosalida   ./1juan/finales/quijoteRestaurado-v.txt
+@ codifica OFF
+
+& Vatsyayana
+
+
+
+
+
+
+
+# fin del fichero de configuracion
