@@ -2,37 +2,27 @@
 
 ## Table of Contents
 1. [Introduction](#introduction)
-2. [Installation](#installation)
-3. [Usage](#usage)
-   - [3.1. Command Line Arguments](#31-command-line-arguments)
-   - [3.2. Config Class](#32-config-class)
-   - [3.3. AutoclaveMethod Class](#33-autoclavemethod-class)
-   - [3.4. AuxiliaryMethods Class](#34-auxiliarymethods-class)
-   - [3.5. Playfair Class](#35-playfair-class)
-   - [3.6. Caesar Class](#36-caesar-class)
-   - [3.7. Vatsayayana Class](#37-vatsayayana-class)
-4. [Conclusions](#conclusions)
-5. [Bibliography](#bibliography)
+2. [Classes](#classes)
+   - [2.1. Main Class](#main-class)
+   - [2.2. Config Class](#config-class)
+   - [2.3. AutoclaveMetodo Class](#autoclavemetodo-class)
+   - [2.4. Metodos_auxiliares Class](#metodos_auxiliares-class)
+   - [2.5. Playfair Class](#playfair-class)
+   - [2.6. Caesar Class](#caesar-class)
+   - [2.7. Vatsayayana Class](#vatsayayana-class)
+3. [Conclusions](#conclusions)
 
-### 1. Introduction
+### 1. Introduction<a name="introduction"></a>
 
 The motivation behind creating this program is the need to generate secure and reliable encrypted messages using the Vigenere table for secret communication. These messages can be both encrypted and decrypted based on the specific requirements. The program is implemented in the Java language, so familiarity with its syntax is necessary for modifications and understanding the steps indicated with comments for tracing purposes or in-depth study of its functionality.
 
 This document aims to explain the underlying principles and the operation of this program for proper handling by the relevant personnel. We will delve into each class and explain the functionality of the methods and attributes they contain.
 
-### 2. Paper Design
-
-Before developing this software, a paper design was created to outline the basic encryption and decryption functionalities, as well as the required input arguments for the program to function correctly (see Figure 1).
-
-![Paper Design](link-to-image)
-
-*Figure 1. Paper design of the software's functionality.*
-
-### 3. Classes
+### 2. Classes<a name="classes"></a>
 
 The classes that compose this program are: Main, AutoclaveMethod, AuxiliaryMethods, Config, Playfair, Caesar, and Vatsayayana. Each class has a set of utilities which will be detailed below.
 
-#### 3.1. Main Class
+#### 2.1. Main Class<a name="main-class"></a>
 
 This is the main class of the program. It handles the input arguments provided to the program via a .bat file located in the project's folder. The executable.bat file executes the program and contains the arguments processed by this class. The P1_si2020.bat file configures how the parameters are input and selects the .jar file that performs all the programming logic.
 
@@ -54,7 +44,7 @@ Regarding the program's logic, it consists of two methods:
 
 After the argument checking, the program proceeds to execute the instructions provided in the configuration file.
 
-#### 3.2. Config Class
+#### 2.2. Config Class<a name="config-class"></a>
 
 This class is responsible for reading and processing the configuration file. It contains the following methods:
 
@@ -71,13 +61,13 @@ The `ProcesarParametros` method includes a switch statement that evaluates the d
 
 The `ProcesarParametros` method also includes a call to the appropriate encryption or decryption method based on the given input.
 
-#### 3.3. AutoclaveMethod Class
+#### 2.3. AutoclaveMetodo Class<a name="autoclavemetodo-class"></a>
 
 This class contains the implementation of the autoclave method, which is used for encryption and decryption. It includes the following methods:
 
 - `Autoclave`: Performs the encryption or decryption using the autoclave method. It takes the input text and a key as parameters and returns the result as a string.
 
-#### 3.4. AuxiliaryMethods Class
+#### 2.4. Metodos_auxiliares Class<a name="metodos_auxiliares-class"></a>
 
 This class contains various auxiliary methods used by the program. These methods include:
 
@@ -85,32 +75,25 @@ This class contains various auxiliary methods used by the program. These methods
 - `ObtenerArchivoConfiguracion`: Returns the name of the configuration file based on the input argument.
 - `MostrarAyuda`: Displays the program's help information.
 
-#### 3.5. Playfair Class
+#### 2.5. Playfair Class<a name="playfair-class"></a>
 
 This class contains the implementation of the Playfair cipher, which is used for encryption and decryption. It includes the following methods:
 
 - `GeneratePlayfairMatrix`: Generates the Playfair matrix based on a given key.
 - `Playfair`: Performs the encryption or decryption using the Playfair cipher. It takes the input text, a key, and a flag indicating whether it is encryption or decryption as parameters and returns the result as a string.
 
-#### 3.6. Caesar Class
+#### 2.6. Caesar Class<a name="caesar-lass"></a>
 
 This class contains the implementation of the Caesar cipher, which is used for encryption and decryption. It includes the following methods:
 
 - `Caesar`: Performs the encryption or decryption using the Caesar cipher. It takes the input text, a key, and a flag indicating whether it is encryption or decryption as parameters and returns the result as a string.
 
-#### 3.7. Vatsayayana Class
+#### 2.7. Vatsayayana Class<a name="vatsayayana-class"></a>
 
 This class contains the implementation of the Vatsayayana cipher, which is used for encryption and decryption. It includes the following methods:
 
 - `Vatsayayana`: Performs the encryption or decryption using the Vatsayayana cipher. It takes the input text, a key, and a flag indicating whether it is encryption or decryption as parameters and returns the result as a string.
 
-### 4. Conclusions
+### 3. Conclusions<a name="conclusions"></a>
 
 In conclusion, this program provides a comprehensive solution for generating secure and reliable encrypted messages using various encryption methods. It allows for easy encryption and decryption based on the provided input arguments and configuration file. By understanding the functionality and usage of each class and method, users can effectively utilize this program for their encryption needs.
-
-### 5. Bibliography
-
-- [Reference 1](link-to-reference-1)
-- [Reference 2](link-to-reference-2)
-- [Reference 3](link-to-reference-3)
-
