@@ -46,53 +46,100 @@ After the argument checking, the program proceeds to execute the instructions pr
 
 #### 2.2. Config Class<a name="config-class"></a>
 
-This class is responsible for reading and processing the configuration file. It contains the following methods:
+This class is used to store and manage the configuration parameters read from the configuration file. It has several attributes:
+- `fichero_configuracion`: Indicates the name of the configuration file.
+- `salidapantalla`: Indicates whether there should be output data displayed on the screen (ON) or not (OFF).
+- `salidafichero`: Indicates whether the output should be written to the output file (ON) or not (OFF).
+- `codifica`: Indicates whether the Autoclave method should perform encoding (ON) or decoding (OFF).
+- `traza`: Indicates whether the program trace should be shown on the screen (ON) or not (OFF).
+- `ficheroentrada`: Indicates the name of the input file to be used for the operations with Autoclave.
+- `ficherosalida`: Indicates the name of the output file where the program output will be saved.
+- `clave`: Indicates the character string from 'a' to 'z' (excluding 'ñ') to be used as the primary key.
+- `clave_larga`: Indicates the key resulting from truncating the formatted plaintext text plus the key (both with the length of the aforementioned text String).
+- `formateaentrada`: Indicates whether the specified text should be formatted and the output dumped into the file specified by `ficherosalida`.
 
-- `LeerArchivoConfiguracion`: Reads the configuration file and returns its content as a string.
-- `ObtenerParametros`: Extracts the parameters from the configuration file and returns them as an array of strings.
-- `ProcesarParametros`: Processes the parameters and performs the corresponding actions based on their values.
+The Config class also has several constructors:
+- Default Constructor: Initializes all the strings to "" and all the booleans to true. `ficherosalida` and `clave` are set to "salida.txt" and "merida" respectively.
+- Parameterized Constructor (fichero_configuracion): Initializes all the data like the default constructor except for `fichero_configuracion`, which is set according to the parameter value.
+- Parameterized Constructor: All the attributes are specified as parameters.
 
-The `ProcesarParametros` method includes a switch statement that evaluates the different parameter options. The available options are as follows:
-
-- `ejecuta`: Executes the corresponding encryption or decryption method based on the given input.
-- `muestraAyuda`: Displays the program's help information.
-- `noValido`: Displays an error message indicating that the provided parameter is invalid.
-- `noExiste`: Displays an error message indicating that the configuration file does not exist.
-
-The `ProcesarParametros` method also includes a call to the appropriate encryption or decryption method based on the given input.
+Additionally, this class contains a series of methods that are used for proper handling of the configuration file data:
+- `leerFichero`: Reads the configuration file specified by `fichero_configuracion`. It performs the following steps in order:
+  - Read a line. If it is blank or starts with the '#' character, discard it and move to the next line. Otherwise, process it.
+  - If the line starts with '@', it is a flag. Read the content after the '@'. If it contains the words 'salidapantalla', 'salidafichero', 'codifica', or 'traza' followed by 'ON' or 'OFF', process it. Otherwise, discard it.
+  - If the line starts with '&', it is a command. Read the content after the '&'.
+    - If it is 'autoclave', execute the method with the same name.
+    - If it is 'ficheroentrada', 'ficherosalida', 'clave', or 'formateaentrada', followed by a TXT file, process it. Otherwise, discard it.
+  If an exception is thrown, it means that the configuration file does not exist or that a required file for a command does not exist.
+- `autoclave`: Processes the 'autoclave' command. It reads the line and splits it into an array using whitespaces as the separator. If the array has two elements and the second element is 'ON' or 'OFF', assign the value to `codifica`. Otherwise, discard the command.
+- `ficheroEntrada`: Processes the 'ficheroentrada' command. It reads the line and splits it into an array using whitespaces as the separator. If the array has two elements and the second element is a valid TXT file, assign the value to `ficheroentrada`. Otherwise, discard the command.
+- `ficheroSalida`: Processes the 'ficherosalida' command. It reads the line and splits it into an array using whitespaces as the separator. If the array has two elements and the second element is a valid TXT file, assign the value to `ficherosalida`. Otherwise, discard the command.
+- `clave`: Processes the 'clave' command. It reads the line and splits it into an array using whitespaces as the separator. If the array has two elements and the second element is a valid character string, assign the value to `clave`. Otherwise, discard the command.
+- `formateaEntrada`: Processes the 'formateaentrada' command. It reads the line and splits it into an array using whitespaces as the separator. If the array has two elements and the second element is 'ON' or 'OFF', assign the value to `formateaentrada`. Otherwise, discard the command.
+- `mostrarContenido`: Displays the content of all the attributes of the class on the screen.
+- `alfabeto_Vatsayana`: Displays the Vatsayayana alfabet.
+- `clave_cesar`: Displays the César key.
 
 #### 2.3. AutoclaveMetodo Class<a name="autoclavemetodo-class"></a>
 
-This class contains the implementation of the autoclave method, which is used for encryption and decryption. It includes the following methods:
+This class contains the main logic for the Autoclave method. It performs the encoding and decoding operations based on the given parameters and configuration. The class has the following methods:
+- `codifica`: Performs the encoding operation. It reads the input file, processes the content, applies the Autoclave encryption algorithm, and writes the output to the specified output file. If the `formateaentrada` flag is ON, it formats the input text before processing.
+- `decodifica`: Performs the decoding operation. It reads the input file, processes the content, applies the Autoclave decryption algorithm, and writes the output to the specified output file.
 
-- `Autoclave`: Performs the encryption or decryption using the autoclave method. It takes the input text and a key as parameters and returns the result as a string.
+The AutoclaveMetodo class also has several helper methods to assist in the encoding and decoding operations:
+- `reiniciarContadores`: Resets the counters used during encoding or decoding.
+- `esNumero`: Checks if a given character is a number.
+- `esLetra`: Checks if a given character is a letter.
+- `posicionCaracter`: Gets the position of a character in the alphabet.
+- `caracterPosicion`: Gets the character at a given position in the alphabet.
+- `esMascara`: Checks if a given character is a mask.
+- `esValido`: Checks if a given character is valid for encoding/decoding.
+- `encodifica`: Applies the encoding algorithm to a given character.
+- `decodifica`: Applies the decoding algorithm to a given character.
+- `procesar`: Processes a given input character based on the encoding/decoding mode and the mask.
+- `ejecutar`: Executes the encoding/decoding operation on the input file and writes the output to the output file.
+- `escribeFichero`: Writes a given string to the output file.
+- `getContenidoFichero`: Retrieves the content of a file as a string.
 
 #### 2.4. Metodos_auxiliares Class<a name="metodos_auxiliares-class"></a>
 
-This class contains various auxiliary methods used by the program. These methods include:
+This class contains auxiliary methods to assist the algorithms.
+Methods:
 
-- `ValidarArgumento`: Validates the input argument and returns a boolean value indicating whether the argument is valid.
-- `ObtenerArchivoConfiguracion`: Returns the name of the configuration file based on the input argument.
-- `MostrarAyuda`: Displays the program's help information.
+- `Contiene_repetidos`: Method that indicates whether there are duplicates or not.
+- `Truncar_Texto`: Method that truncates text.
+- `Comprobar_clave_playfair`: Method that checks if the Playfair key is valid or not.
+- `Formatear`: Method that formats text by removing special characters and spaces.
+- `formatear_playfair`: Method that formats text by removing special characters except for "ñ".
+- `formatear_2`: Method that formats text by removing special characters except for "ñ" and accented vowels.
+- `rotateArray`: Method that rotates an array to the right or left.
+- `isNumeric`: Method that checks whether a string is a numeric value or not.
 
 #### 2.5. Playfair Class<a name="playfair-class"></a>
 
-This class contains the implementation of the Playfair cipher, which is used for encryption and decryption. It includes the following methods:
-
-- `GeneratePlayfairMatrix`: Generates the Playfair matrix based on a given key.
-- `Playfair`: Performs the encryption or decryption using the Playfair cipher. It takes the input text, a key, and a flag indicating whether it is encryption or decryption as parameters and returns the result as a string.
+Class responsible for Playfair encryption and decryption.
+Methods:
+- `Comando_playfair_cifrar`: Method responsible for Playfair encryption.
+- `Comando_playfair_descifrar`: Method responsible for Playfair decryption.
 
 #### 2.6. Caesar Class<a name="caesar-lass"></a>
 
-This class contains the implementation of the Caesar cipher, which is used for encryption and decryption. It includes the following methods:
-
-- `Caesar`: Performs the encryption or decryption using the Caesar cipher. It takes the input text, a key, and a flag indicating whether it is encryption or decryption as parameters and returns the result as a string.
+Class responsible for Caesar encryption and decryption.
+Methods:
+- `Comando_cargaclavecesar`: Method that loads the Caesar key.
+- `Comando_clavecesar`: Method that saves the passed key in a tokenizer.
+- `Comando_cesar_cifrado`: Method that encrypts using the Caesar algorithm.
+- `Comando_cesar_descifrado`: Method that decrypts using the Caesar algorithm.
+- `Comando_generaclavecesar`: Method that generates a random Caesar key.
 
 #### 2.7. Vatsayayana Class<a name="vatsayayana-class"></a>
 
-This class contains the implementation of the Vatsayayana cipher, which is used for encryption and decryption. It includes the following methods:
-
-- `Vatsayayana`: Performs the encryption or decryption using the Vatsayayana cipher. It takes the input text, a key, and a flag indicating whether it is encryption or decryption as parameters and returns the result as a string.
+Class responsible for Vatsayayana encryption and decryption.
+Methods:
+- `Comando_vatsayayana`: Method that performs Vatsayayana encryption or decryption.
+- `Comando_alfabetovatsyayana`: Method that loads a given alphabet as parameters.
+- `Comando_generaalfabetovatsyayana`: Method that generates a random alphabet and loads it.
+- `Comando_cargaalfabetovatsyayana`: Method that loads the alphabet from the input file.
 
 ### 3. Conclusions<a name="conclusions"></a>
 
